@@ -416,6 +416,9 @@ select.blankSel option{background:var(--panel2);color:var(--ink)}
 </div>
 <div class="toast" id="toast"></div>
 
+<!-- Optional syntax highlighting shared with the production editor. -->
+<script src="lib/tsdark.js"></script>
+
 <script>
 "use strict";
 /* =====================================================================
@@ -5965,6 +5968,7 @@ function renderHome(){
 }
 function renderCheat(){
   view.innerHTML = `<div class="lvHead"><button class="btn ghost sm" id="backBtn">◀ กลับ</button><h2>📜 โพยสรุปเข้าห้องสอบ</h2></div><div class="cheat">` + CHEAT + `</div>`;
+  if(window.TSDark) TSDark.paintAll(view);
   wrapWideTables(view.querySelector(".cheat"));
   document.getElementById("backBtn").addEventListener("click", ()=>{ location.hash = ""; });
 }
@@ -6018,6 +6022,7 @@ function renderLevel(i){
     ${i < LEVELS.length - 1 ? `<button class="btn ghost" id="nextLv" style="margin-left:auto">ด่าน ${i+1} ▶</button>` : ""}
   </div>`;
   view.innerHTML = h;
+  if(window.TSDark) TSDark.paintAll(view);
   wrapWideTables(view.querySelector(".teach"));
   document.getElementById("backBtn").addEventListener("click", ()=>{ location.hash = ""; });
   const p = document.getElementById("prevLv"), nx = document.getElementById("nextLv");
@@ -6060,7 +6065,12 @@ function toggleEx(j){
 }
 
 /* ---------- exercise bodies ---------- */
-function codePre(code){ const pre = document.createElement("pre"); pre.className = "code"; pre.textContent = code; return pre; }
+function codePre(code){
+  const pre = document.createElement("pre"); pre.className = "code";
+  if(window.TSDark){ TSDark.ensureCSS(); pre.innerHTML = TSDark.highlight(code); }
+  else pre.textContent = code;
+  return pre;
+}
 function renderExBody(j){
   const lv = LEVELS[curL], ex = lv.ex[j];
   const body = document.getElementById("exb" + j);
@@ -6494,7 +6504,7 @@ function renderWrite(ex, body, j){
   body.appendChild(think);
   const ta = document.createElement("textarea"); ta.className = "ed"; ta.spellcheck = false;
   ta.value = (st.code != null) ? st.code : (ex.starter || "");
-  body.appendChild(ta);
+  body.appendChild(window.TSDark ? TSDark.attach(ta) : ta);
   wireCodeEditor(ta, ()=>runBtn.click());
   const row = document.createElement("div"); row.className = "runRow";
   const runBtn = document.createElement("button"); runBtn.className = "btn"; runBtn.textContent = "▶ รันเทสต์";
